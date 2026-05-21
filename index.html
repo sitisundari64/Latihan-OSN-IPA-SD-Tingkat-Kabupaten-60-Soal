@@ -1,0 +1,887 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CBT OSN IPA SD Kabupaten - Siti Sundari</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',Tahoma,sans-serif;min-height:100vh;background:linear-gradient(135deg,#0a2463 0%,#1a3a8f 50%,#0d4f8a 100%);padding:20px}
+
+/* Watermark */
+#watermarkOverlay{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:9999;overflow:hidden}
+.wm-text{position:absolute;font-size:16px;font-weight:700;color:rgba(255,255,255,0.05);transform:rotate(-35deg);white-space:nowrap;letter-spacing:2px}
+
+/* Cards */
+.card{background:rgba(255,255,255,0.97);border-radius:16px;padding:28px;box-shadow:0 20px 60px rgba(0,0,0,0.3)}
+
+/* Buttons */
+.btn{padding:12px 28px;border-radius:10px;border:none;font-size:15px;font-weight:600;cursor:pointer;transition:all .2s}
+.btn-primary{background:linear-gradient(135deg,#1a3a8f,#0d4f8a);color:#fff}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 8px 20px rgba(13,79,138,0.4)}
+.btn-nav{padding:10px 20px;border-radius:8px;border:none;font-size:14px;font-weight:600;cursor:pointer;background:#e8f0fe;color:#1a3a8f}
+.btn-nav:hover{background:#1a3a8f;color:#fff}
+.btn-submit{padding:12px 28px;border-radius:10px;border:none;font-size:15px;font-weight:600;cursor:pointer;background:linear-gradient(135deg,#e63946,#c1121f);color:#fff;transition:all .2s}
+.btn-submit:hover{transform:translateY(-2px);box-shadow:0 8px 20px rgba(198,18,31,0.4)}
+
+/* Form */
+input[type="text"],select{width:100%;padding:12px 16px;border:2px solid #e0e7ff;border-radius:10px;font-size:15px;outline:none;transition:border .2s;background:#fff}
+input[type="text"]:focus,select:focus{border-color:#1a3a8f}
+
+/* Header */
+.header{background:linear-gradient(135deg,#1a3a8f,#0d4f8a);color:#fff;border-radius:14px;padding:16px 20px;margin-bottom:20px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px}
+
+/* Timer */
+.timer{background:rgba(255,255,255,0.15);border-radius:10px;padding:8px 16px;font-size:20px;font-weight:700;font-family:monospace}
+.timer.urgent{background:rgba(230,57,70,0.8);animation:pulse 1s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.7}}
+
+/* Progress */
+.progress-bar{height:8px;background:rgba(255,255,255,0.2);border-radius:4px;overflow:hidden;margin-top:8px;width:200px}
+.progress-fill{height:100%;background:#4ade80;border-radius:4px;transition:width .3s}
+
+/* Options */
+.opt{display:block;padding:12px 16px;border:2px solid #e0e7ff;border-radius:10px;margin:8px 0;cursor:pointer;transition:all .2s;background:#f8faff;line-height:1.5}
+.opt:hover{border-color:#1a3a8f;background:#e8f0fe}
+.opt.selected{border-color:#1a3a8f;background:#dbeafe;font-weight:600}
+.opt.correct{border-color:#16a34a !important;background:#dcfce7 !important;color:#14532d}
+.opt.wrong{border-color:#dc2626 !important;background:#fee2e2 !important;color:#7f1d1d}
+.opt.reveal-correct{border-color:#16a34a !important;background:#dcfce7 !important;color:#14532d}
+
+/* Nav Grid */
+.q-nav{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}
+.q-num{width:36px;height:36px;border-radius:8px;border:none;cursor:pointer;font-size:13px;font-weight:600;transition:all .2s}
+.q-num.unanswered{background:#e0e7ff;color:#1a3a8f}
+.q-num.answered{background:#1a3a8f;color:#fff}
+.q-num.current{outline:2px solid #f59e0b}
+
+/* Score */
+.score-circle{width:140px;height:140px;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;margin:0 auto 20px;font-size:42px;font-weight:800;color:#fff}
+.score-great{background:linear-gradient(135deg,#16a34a,#4ade80)}
+.score-good{background:linear-gradient(135deg,#0d4f8a,#1a3a8f)}
+.score-avg{background:linear-gradient(135deg,#f59e0b,#ef4444)}
+.score-low{background:linear-gradient(135deg,#dc2626,#7f1d1d)}
+
+/* Feedback */
+.feedback-item{padding:10px 14px;border-radius:8px;margin:6px 0;font-size:13px;line-height:1.5}
+.fb-correct{background:#dcfce7;border-left:4px solid #16a34a;color:#14532d}
+.fb-wrong{background:#fee2e2;border-left:4px solid #dc2626;color:#7f1d1d}
+.fb-skip{background:#f0f9ff;border-left:4px solid #0369a1;color:#075985}
+
+/* Badge */
+.badge{display:inline-block;padding:4px 12px;border-radius:20px;font-size:12px;font-weight:600;background:#dbeafe;color:#1a3a8f;margin-bottom:8px}
+.section-title{font-size:13px;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px}
+
+/* Stat Cards */
+.stat-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:20px}
+.stat-card{border-radius:10px;padding:14px;text-align:center}
+.stat-correct{background:#dcfce7}
+.stat-wrong{background:#fee2e2}
+.stat-skip{background:#f0f9ff}
+.stat-num{font-size:22px;font-weight:700}
+.stat-label{font-size:12px;margin-top:2px}
+
+/* Login */
+.login-logo{width:70px;height:70px;background:linear-gradient(135deg,#1a3a8f,#0d4f8a);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;font-size:30px}
+
+/* Responsive */
+@media(max-width:600px){
+  .stat-grid{grid-template-columns:1fr 1fr}
+  .progress-bar{width:150px}
+  .header{flex-direction:column;align-items:flex-start}
+}
+</style>
+</head>
+<body>
+
+<!-- Watermark Overlay -->
+<div id="watermarkOverlay"></div>
+
+<!-- LOGIN SCREEN -->
+<div id="loginScreen" style="max-width:500px;margin:40px auto">
+  <div class="card">
+    <div style="text-align:center;margin-bottom:24px">
+      <div class="login-logo">🏆</div>
+      <h1 style="font-size:22px;font-weight:700;color:#1a3a8f">CBT OSN IPA SD</h1>
+      <p style="color:#64748b;font-size:14px;margin-top:6px">Olimpiade Sains Nasional &middot; Tingkat Kabupaten</p>
+      <span class="badge" style="margin-top:8px">60 Soal &middot; 90 Menit</span>
+    </div>
+    <div style="margin-bottom:16px">
+      <div class="section-title">Nama Peserta</div>
+      <input type="text" id="nameInput" placeholder="Masukkan nama lengkap...">
+    </div>
+    <div style="margin-bottom:24px">
+      <div class="section-title">Kelas</div>
+      <select id="classInput">
+        <option value="">-- Pilih Kelas --</option>
+        <option value="3">Kelas 3</option>
+        <option value="4">Kelas 4</option>
+        <option value="5">Kelas 5</option>
+        <option value="6">Kelas 6</option>
+      </select>
+    </div>
+    <button class="btn btn-primary" style="width:100%" onclick="startExam()">Mulai Ujian &rarr;</button>
+    <p id="loginError" style="color:#dc2626;font-size:13px;text-align:center;margin-top:10px;display:none">
+      Harap isi nama dan kelas terlebih dahulu!
+    </p>
+    <p style="color:#94a3b8;font-size:11px;text-align:center;margin-top:16px">&copy; Siti Sundari &middot; Kumpulan Soal OSN</p>
+  </div>
+</div>
+
+<!-- EXAM SCREEN -->
+<div id="examScreen" style="display:none;max-width:780px;margin:0 auto">
+  <div class="header">
+    <div>
+      <div style="font-size:13px;opacity:.8">CBT OSN IPA SD Kabupaten</div>
+      <div style="font-size:15px;font-weight:700" id="headerName"></div>
+      <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+    </div>
+    <div style="text-align:right">
+      <div style="font-size:12px;opacity:.8;margin-bottom:4px">Sisa Waktu</div>
+      <div class="timer" id="timerDisplay">90:00</div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-bottom:16px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:8px">
+      <span class="badge">Soal <span id="qNum">1</span> dari 60</span>
+      <span style="font-size:13px;color:#64748b" id="answeredCount">0 terjawab</span>
+    </div>
+    <div id="qText" style="font-size:15px;line-height:1.7;color:#1e293b;margin-bottom:16px"></div>
+    <div id="optionsContainer"></div>
+    <div style="display:flex;gap:10px;margin-top:20px;justify-content:space-between;flex-wrap:wrap">
+      <button class="btn btn-nav" onclick="prevQ()">&larr; Sebelumnya</button>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn btn-nav" onclick="nextQ()">Berikutnya &rarr;</button>
+        <button class="btn btn-submit" onclick="confirmSubmit()">Selesai &#10003;</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" style="padding:16px">
+    <div class="section-title">Navigasi Soal</div>
+    <div class="q-nav" id="qNavGrid"></div>
+  </div>
+</div>
+
+<!-- RESULT SCREEN -->
+<div id="resultScreen" style="display:none;max-width:600px;margin:0 auto">
+  <div class="card">
+    <div style="text-align:center;margin-bottom:20px">
+      <h1 style="font-size:22px;font-weight:700;color:#1a3a8f;margin-bottom:4px">Hasil Ujian</h1>
+      <p style="color:#64748b;font-size:13px" id="resultMeta"></p>
+    </div>
+    <div id="scoreCircle" class="score-circle score-good">
+      <div id="scoreNum">0</div>
+      <div style="font-size:14px;font-weight:500">Nilai</div>
+    </div>
+    <div class="stat-grid">
+      <div class="stat-card stat-correct">
+        <div class="stat-num" id="rCorrect" style="color:#16a34a">0</div>
+        <div class="stat-label" style="color:#166534">Benar</div>
+      </div>
+      <div class="stat-card stat-wrong">
+        <div class="stat-num" id="rWrong" style="color:#dc2626">0</div>
+        <div class="stat-label" style="color:#7f1d1d">Salah</div>
+      </div>
+      <div class="stat-card stat-skip">
+        <div class="stat-num" id="rSkip" style="color:#0369a1">0</div>
+        <div class="stat-label" style="color:#075985">Kosong</div>
+      </div>
+    </div>
+    <div id="feedbackMsg" style="padding:16px;border-radius:10px;font-size:15px;text-align:center;margin-bottom:20px;font-weight:600"></div>
+    <div style="border-top:1px solid #e0e7ff;padding-top:16px">
+      <div class="section-title">Pembahasan Jawaban</div>
+      <div id="reviewList" style="max-height:350px;overflow-y:auto;padding-right:4px"></div>
+    </div>
+    <button class="btn btn-primary" style="width:100%;margin-top:16px" onclick="resetExam()">Ulangi Ujian</button>
+    <p style="color:#94a3b8;font-size:11px;text-align:center;margin-top:12px">&copy; Siti Sundari &middot; CBT OSN IPA SD Kabupaten</p>
+  </div>
+</div>
+
+<script>
+// === WATERMARK ===
+(function(){
+  var wm = document.getElementById('watermarkOverlay');
+  var positions = [
+    [10,5],[30,20],[55,8],[75,25],[15,45],[40,50],[65,42],[85,55],
+    [5,70],[30,75],[55,65],[80,80],[20,88],[60,90],[45,30],[70,68]
+  ];
+  positions.forEach(function(pos){
+    var el = document.createElement('div');
+    el.className = 'wm-text';
+    el.textContent = 'Siti Sundari';
+    el.style.top = pos[1] + '%';
+    el.style.left = pos[0] + '%';
+    wm.appendChild(el);
+  });
+})();
+
+// === SOAL BANK ===
+var QUESTIONS = [
+  {
+    q: "Gunadi mengamati adanya perbedaan warna bunga pada tumbuhan asoka, padahal bunga tersebut tumbuh dari suatu pohon yang sama. Hal yang dilakukan Gunadi tersebut merupakan bagian dari proses ....",
+    opts: ["Pengumpulan data", "Penyusunan hipotesis", "Observasi permasalahan", "Pengambilan kesimpulan"],
+    ans: 2
+  },
+  {
+    q: "Sebuah tim ilmuwan sedang meneliti bagaimana perubahan iklim memengaruhi distribusi mikroorganisme di ekosistem laut dalam. Mereka mengumpulkan sampel air dari beberapa lokasi dengan perbedaan suhu yang signifikan. Langkah yang tepat dalam penerapan metode ilmiah untuk memastikan bahwa hasil penelitian tersebut akurat dan valid adalah ....",
+    opts: [
+      "Mengumpulkan lebih banyak sampel dari permukaan laut karena mikroorganisme di sana lebih mudah dianalisis",
+      "Membiarkan sampel air laut berada di suhu ruangan selama beberapa jam sebelum dianalisis",
+      "Menyesuaikan kondisi laboratorium agar sesuai dengan lingkungan laut dalam, termasuk suhu dan tekanan air",
+      "Menambahkan nutrisi buatan ke dalam sampel sebelum analisis untuk meningkatkan pertumbuhan mikroorganisme"
+    ],
+    ans: 2
+  },
+  {
+    q: "Perhatikan gambar hewan berikut (udang/lobster). Hewan tersebut berkerabat dekat dengan hewan di bawah ini, KECUALI ....",
+    opts: ["Belalang", "Kepiting", "Kutu", "Kerang"],
+    ans: 3
+  },
+  {
+    q: "Perhatikan gambar bagian tumbuhan berupa kerucut (strobilus/runjung). Bagian tumbuhan tersebut dimiliki oleh kelompok tumbuhan ....",
+    opts: ["Angiospermae", "Bryophyta", "Pteridophyta", "Gymnospermae"],
+    ans: 3
+  },
+  {
+    q: "Perhatikan gambar bunga Rafflesia. Tumbuhan langka tersebut memiliki ukuran bunga yang besar dan berbau busuk. Bunga tersebut tidak memiliki daun, batang sejati, dan akar, serta hidup menumpang pada tumbuhan inangnya. Berdasarkan ciri-ciri tersebut, klasifikasi yang paling tepat untuk bunga tersebut adalah ....",
+    opts: [
+      "Kingdom Plantae, karena merupakan tumbuhan berbunga dan melakukan fotosintesis",
+      "Kingdom Fungi, karena hidup sebagai pengurai dan tidak berfotosintesis",
+      "Kingdom Protista, karena bersifat autotrof dan heterotrof",
+      "Kingdom Plantae, namun termasuk parasit karena bergantung pada inang untuk bertahan hidup"
+    ],
+    ans: 3
+  },
+  {
+    q: "Suatu tim peneliti menemukan makhluk hidup mikroskopis di perairan rawa gambut Kalimantan. Makhluk tersebut memiliki ciri-ciri: (1) Satu sel, (2) Hidup bebas, (3) Memiliki inti sel, (4) Dapat melakukan fotosintesis atau menangkap mangsa kecil dengan pseudopodia (kaki semu). Makhluk tersebut paling tepat diklasifikasikan ke dalam Kingdom ....",
+    opts: [
+      "Plantae, karena mampu melakukan fotosintesis",
+      "Protista, karena bersel satu, memiliki inti sel, dan bersifat autotrof serta heterotrof",
+      "Monera, karena bersifat mikroskopis dan hidup bebas",
+      "Animalia, karena menangkap dan memangsa organisme lain"
+    ],
+    ans: 1
+  },
+  {
+    q: "Firdaus mengamati berbagai jenis jamur di lingkungan sekolah. Firdaus menemukan jamur yang hidup menempel pada roti dan jamur lain yang tumbuh pada pohon lapuk. Jamur-jamur tersebut tidak memiliki klorofil dan memperoleh makanan dari bahan organik di sekitarnya. Dari hasil pengamatan tersebut, siswa menyimpulkan bahwa jamur termasuk makhluk hidup ....",
+    opts: [
+      "Autotrof karena bisa menghasilkan makanannya sendiri",
+      "Heterotrof karena mengambil makanan dari organisme lain",
+      "Insektivora karena memangsa serangga kecil",
+      "Fotosintetik karena tumbuh di tempat terang"
+    ],
+    ans: 1
+  },
+  {
+    q: "Perhatikan organisme berikut dalam tabel (Cacing Tanah: tidak ada tulang/kaki/rambut; Salmon: ada tulang, tidak ada kaki/rambut; Kadal: ada tulang dan kaki, tidak ada rambut; Kucing: ada tulang, kaki, dan rambut). Berdasarkan karakteristik dan prinsip pengelompokan makhluk hidup, manakah pengelompokan yang paling sesuai?",
+    opts: [
+      "Cacing tanah dan salmon masuk dalam satu kelompok karena keduanya tidak memiliki kaki",
+      "Kadal dan kucing masuk dalam satu kelompok karena memiliki lebih banyak karakteristik yang sama",
+      "Salmon dan kucing masuk dalam satu kelompok karena sama-sama memiliki tulang belakang",
+      "Semua organisme dalam tabel termasuk dalam kelompok yang sama karena memiliki setidaknya satu kesamaan"
+    ],
+    ans: 1
+  },
+  {
+    q: "Ridwan mengamati dua preparat mikroskopis dengan hasil sebagai berikut: Preparat A: sel berbentuk panjang dan ramping, tampak memiliki banyak inti di tepi. Preparat B: sel berbentuk bulat, hanya satu inti, dan tidak dapat berkontraksi. Berdasarkan hasil tersebut, fungsi sel pada preparat A dan B adalah ....",
+    opts: [
+      "Preparat A: menyimpan lemak, Preparat B: mengangkut oksigen",
+      "Preparat A: melindungi jaringan, Preparat B: menyerap zat makanan",
+      "Preparat A: kontraksi otot, Preparat B: menyusun jaringan epitel",
+      "Preparat A: menyusun tulang, Preparat B: menyimpan air"
+    ],
+    ans: 2
+  },
+  {
+    q: "Tumbuhan talas memiliki lapisan lilin pada bagian daunnya yang bertujuan untuk ....",
+    opts: ["Mengurangi transpirasi", "Mengurangi gutasi", "Meningkatkan transpirasi", "Mengurangi gutasi"],
+    ans: 0
+  },
+  {
+    q: "Perhatikan gambar penampang melintang batang tumbuhan dikotil (bagian 1, 2, 3, 4 dari luar ke dalam). Batang tumbuhan dikotil akan memulai pertumbuhan sekunder dan membesar pada bagian nomor ....",
+    opts: ["1", "2", "3", "4"],
+    ans: 0
+  },
+  {
+    q: "Pembuluh darah berikut membawa darah yang banyak mengandung karbon dioksida, KECUALI ....",
+    opts: ["Vena kava superior", "Vena kava inferior", "Vena pulmonalis", "Arteri pulmonalis"],
+    ans: 2
+  },
+  {
+    q: "Mulyani menutup sebagian daun tumbuhan dengan aluminium foil, lalu meletakkannya di bawah sinar matahari selama 6 jam. Setelah itu, dilakukan uji yodium pada seluruh daun. Hasil dari uji yodium tersebut didapatkan bahwa bagian yang tertutup foil tidak berubah warna, sedangkan bagian yang terbuka berubah menjadi biru kehitaman. Kesimpulan yang tepat dari percobaan tersebut adalah ....",
+    opts: [
+      "Cahaya tidak memengaruhi pembentukan glukosa",
+      "Fotosintesis terjadi di semua bagian daun",
+      "Cahaya diperlukan untuk menghasilkan pati dalam fotosintesis",
+      "Aluminium foil mempercepat fotosintesis"
+    ],
+    ans: 2
+  },
+  {
+    q: "Bagian jantung yang memiliki struktur lapisan otot yang paling tebal adalah ....",
+    opts: ["Atrium kanan", "Ventrikel kanan", "Atrium kiri", "Ventrikel kiri"],
+    ans: 3
+  },
+  {
+    q: "Perhatikan grafik transpirasi vs waktu (Garis A paling tinggi, Garis B sedang, Garis C paling rendah). Pernyataan tentang kondisi yang paling tepat berkaitan dengan pola pada grafik tersebut adalah ....",
+    opts: [
+      "Paparan cahaya hijau meningkatkan transpirasi, menghasilkan pola seperti pada Garis A",
+      "Pelapisan daun dengan kuteks bening menghambat transpirasi, sesuai dengan pola pada Garis C",
+      "Menutup tanaman dengan kantong plastik mempercepat transpirasi, menjelaskan pola pada Garis A",
+      "Penggunaan kipas mengurangi transpirasi, menghasilkan pola seperti pada Garis C"
+    ],
+    ans: 1
+  },
+  {
+    q: "Beberapa tumbuhan memiliki tipe biji ringan dan bersayap, ada pula yang berdaging, dan ada pula yang mampu bertahan di air. Pernyataan yang paling tepat terkait hal tersebut adalah ....",
+    opts: [
+      "Biji ringan dan bersayap lebih mudah tersebar di air",
+      "Biji berdaging lebih sering terbawa manusia",
+      "Secara alami semua biji berpindah tanpa bantuan apa pun",
+      "Biji yang bertahan di air lebih sering berpindah melalui aliran/arus"
+    ],
+    ans: 3
+  },
+  {
+    q: "Pembuatan jalur ekologi di bagian bawah jalan tol, berfungsi untuk memudahkan migrasi hewan berikut, KECUALI ....",
+    opts: ["Kadal", "Kera", "Gajah", "Ayam hutan"],
+    ans: 1
+  },
+  {
+    q: "Kebakaran hutan akan berperan besar dalam menyumbangkan molekul ... ke atmosfer.",
+    opts: ["Nitrogen", "Sulfur", "Karbon", "Hidrogen"],
+    ans: 2
+  },
+  {
+    q: "Sebuah danau memiliki populasi ikan nila, ganggang hijau, plankton, dan burung bangau. Ikan memakan plankton, sedangkan burung bangau memakan ikan. Jika populasi plankton menurun drastis akibat pencemaran air, dampak pertama yang paling mungkin terjadi adalah ....",
+    opts: [
+      "Burung bangau bertambah banyak",
+      "Populasi ganggang meningkat pesat",
+      "Populasi ikan nila menurun",
+      "Air menjadi lebih jernih"
+    ],
+    ans: 2
+  },
+  {
+    q: "Perhatikan gambar jaring makanan (elang &rarr; ular &rarr; tikus &rarr; belalang &rarr; tanaman; jamur sebagai pengurai). Jika populasi konsumen tingkat 2 menurun drastis, maka kemungkinan besar yang akan terjadi adalah ....",
+    opts: [
+      "Populasi ular bertambah karena lebih banyak makanan",
+      "Populasi elang menurun karena kekurangan makanan",
+      "Populasi belalang menurun karena lebih banyak pemangsa",
+      "Tanaman menjadi langka karena elang memakannya"
+    ],
+    ans: 1
+  },
+  {
+    q: "In a forest ecosystem, starlings often perch on the backs of buffaloes and eat the ticks on their bodies. The relationship between the starling and the buffalo is an example of which type of interaction?",
+    opts: ["Competition", "Parasitism", "Mutualism", "Predation"],
+    ans: 2
+  },
+  {
+    q: "Seekor unta dapat bertahan hidup di gurun karena memiliki punuk yang berisi lemak. Fungsi punuk tersebut adalah ....",
+    opts: [
+      "Menyimpan air agar unta tidak haus",
+      "Menyimpan energi cadangan",
+      "Menghasilkan panas agar tubuh tetap hangat",
+      "Menyerap oksigen dari udara panas"
+    ],
+    ans: 1
+  },
+  {
+    q: "Hipotesis yang paling mungkin menjelaskan mengapa keanekaragaman spesies lebih tinggi di daerah tropis dibandingkan dengan daerah beriklim sedang adalah ....",
+    opts: [
+      "Sumber daya yang lebih melimpah",
+      "Ekosistem tropis lebih tua dan berkembang lebih lama",
+      "Iklim hangat memungkinkan spesies berkembang lebih cepat",
+      "Daerah tropis memiliki lebih sedikit pemangsa dibandingkan wilayah lain"
+    ],
+    ans: 0
+  },
+  {
+    q: "Perhatikan piramida energi berikut (Tingkat I = 100.000 J, Tingkat II = 10.000 J, Tingkat III = 1.000 J, Tingkat IV = 100 J). Jika pola aliran energi mengikuti prinsip ekologi, pernyataan yang paling tepat tentang tingkat trofik III dan IV adalah ....",
+    opts: [
+      "Tingkat trofik III memiliki lebih banyak energi daripada tingkat trofik II karena berperan sebagai konsumen sekunder",
+      "Energi pada tingkat trofik III lebih dari 100 Joule, sedangkan tingkat trofik IV kurang dari 1.000 Joule",
+      "Predator puncak memiliki lebih banyak energi karena mendapatkan makanan dari berbagai sumber",
+      "Tingkat trofik IV akan kehabisan energi, sehingga organisme di tingkat ini lebih berisiko mengalami kepunahan"
+    ],
+    ans: 1
+  },
+  {
+    q: "Penyakit yang tepat jika diobati menggunakan antibiotik adalah ....",
+    opts: ["COVID-19", "Demam berdarah", "TBC", "Cacar"],
+    ans: 2
+  },
+  {
+    q: "Penyakit berikut dapat disebarkan oleh kelompok hewan Arthropoda, KECUALI ....",
+    opts: ["Malaria", "Disentri", "Pes", "Diare"],
+    ans: 2
+  },
+  {
+    q: "Sistem kekebalan tubuh dapat ditingkatkan dengan banyak mengonsumsi makanan yang mengandung tinggi ... dan juga suplemen berupa ....",
+    opts: [
+      "Karbohidrat dan zink",
+      "Protein dan kalsium",
+      "Karbohidrat dan vitamin C",
+      "Protein dan vitamin C"
+    ],
+    ans: 3
+  },
+  {
+    q: "Berikut merupakan langkah yang tepat untuk mengurangi penyebaran penyakit menular, yaitu dengan ....",
+    opts: [
+      "Meningkatkan mobilitas masyarakat",
+      "Memantau dan mendeteksi kasus penyakit secara dini",
+      "Mengurangi edukasi kesehatan kepada masyarakat",
+      "Meningkatkan jumlah kasus resistensi antibiotik"
+    ],
+    ans: 1
+  },
+  {
+    q: "Kasus Demam Berdarah Dengue (DBD) sering meningkat saat musim hujan. Setelah menerima vaksin, tubuh Dina menjadi lebih siap untuk melawan virus jika suatu saat terkena gigitan nyamuk Aedes aegypti. Cara kerja vaksin dengue dalam melindungi tubuh dari demam berdarah adalah ....",
+    opts: [
+      "Membantu sistem imun mengenali virus dengue lebih cepat",
+      "Memperkuat daya tahan tubuh agar tidak mudah sakit",
+      "Menghentikan penyebaran nyamuk di lingkungan sekitar",
+      "Mencegah tubuh terkena semua jenis penyakit infeksi"
+    ],
+    ans: 0
+  },
+  {
+    q: "Di sebuah desa, warga sering membakar sampah plastik di halaman rumah. Beberapa hari kemudian, banyak warga mengeluh sakit tenggorokan, sesak napas, dan batuk-batuk. Jika kamu menjadi ilmuwan cilik yang diminta memberi solusi pada masalah tersebut, maka langkah awal yang paling tepat adalah ....",
+    opts: [
+      "Mengedukasi warga agar memakai masker saat membakar sampah plastik",
+      "Menyarankan membakar sampah plastik pada malam hari",
+      "Mengedukasi warga tentang cara pengelolaan sampah plastik",
+      "Menutup semua rumah dengan plastik agar asap tidak masuk"
+    ],
+    ans: 2
+  },
+  {
+    q: "Perhatikan gambar rangkaian listrik (2 baterai: 2,4V dan 3,6V seri, hambatan 2&Omega; seri, kemudian paralel dengan hambatan 12&Omega;, disambung hambatan 4&Omega; dan 1&Omega; seri). Kuat arus listrik yang mengalir pada lampu dengan hambatan 4,0 &Omega; adalah ....",
+    opts: ["0,25 A", "0,50 A", "0,75 A", "1,00 A"],
+    ans: 2
+  },
+  {
+    q: "Perhatikan gambar balon yang digosok dengan kain wool sehingga dapat menarik potongan kertas kecil. Fenomena listrik statis yang dihasilkan oleh balon dan kain wool terjadi karena ....",
+    opts: [
+      "Elektron dari kain wool berpindah dari kain wool ke balon",
+      "Proton dari balon berpindah dari balon ke kain wool",
+      "Elektron dari balon berpindah dari balon ke kain wool",
+      "Proton dari kain wool berpindah dari kain wool ke balon"
+    ],
+    ans: 0
+  },
+  {
+    q: "Hans Christian Oersted (1777-1851) adalah seorang fisikawan dan kimiawan asal Denmark yang menemukan bahwa listrik dan magnetisme itu berkaitan. Berikut yang merupakan fenomena percobaan dari penemuan Hans Christian Oersted yang terkenal tersebut, yaitu ditunjukkan pada gambar ....",
+    opts: [
+      "Dua bola bermuatan listrik yang tolak menolak",
+      "Elektromagnet dengan kumparan besar",
+      "Kompas yang bergerak saat arus listrik dialirkan pada kawat di dekatnya",
+      "Magnet yang bergerak mendekati kumparan dan menghasilkan arus"
+    ],
+    ans: 2
+  },
+  {
+    q: "Perhatikan gambar partikel bergerak melewati plat bermuatan listrik (plat (+) di atas dan plat (-) di bawah, partikel masuk dari kiri lurus/Lintasan II, kemudian ada Lintasan I ke atas dan Lintasan III ke bawah). Pasangan lintasan yang dilalui berkas partikel dan lambang partikelnya adalah ....",
+    opts: [
+      "I &ndash; e, II &ndash; p, III &ndash; n",
+      "III &ndash; p, II &ndash; e, I &ndash; n",
+      "II &ndash; n, I &ndash; e, III &ndash; p",
+      "II &ndash; n, III &ndash; e, I &ndash; p"
+    ],
+    ans: 2
+  },
+  {
+    q: "Perhatikan gambar: (1) Pembangkit Listrik Tenaga Air, (2) Pembangkit Listrik Tenaga Angin, (3) Pembangkit Listrik Tenaga Panas Bumi, (4) Pembangkit Listrik Tenaga Surya. Sistem energi terbarukan yang konversi energinya merupakan penerapan dari sifat kelistrikan dan kemagnetan adalah ....",
+    opts: ["(1) dan (3)", "(2) dan (4)", "(1), (2), dan (3)", "Semua benar"],
+    ans: 2
+  },
+  {
+    q: "Perhatikan gambar tujuh satelit terbesar dalam tata surya (Moon, Io, Europa, Ganymede, Callisto, Titan, Triton). Satelit yang memiliki atmosfer adalah ....",
+    opts: ["Moon", "Ganymede", "Callisto", "Titan"],
+    ans: 3
+  },
+  {
+    q: "Empat satelit besar di planet Jupiter yang ditemukan oleh Galileo dan disebut satelit Galilean adalah ....",
+    opts: [
+      "Io, Europa, Titan, dan Triton",
+      "Io, Europa, Ganymede, dan Callisto",
+      "Io, Ganymede, Callisto, dan Titan",
+      "Europa, Ganymede, Callisto, dan Titan"
+    ],
+    ans: 1
+  },
+  {
+    q: "Planet yang disebut kelompok planet gas adalah ....",
+    opts: [
+      "Merkurius, Venus, dan Bumi",
+      "Merkurius, Jupiter dan Saturnus",
+      "Mars, Uranus dan Neptunus",
+      "Jupiter, Uranus dan Neptunus"
+    ],
+    ans: 3
+  },
+  {
+    q: "Perhatikan gambar posisi Matahari &ndash; Bulan &ndash; Bumi (Bulan berada di antara Matahari dan Bumi, dengan bayangan Bulan jatuh ke Bumi). Gambar tersebut merupakan fenomena dari peristiwa ....",
+    opts: [
+      "Gerhana Matahari &ndash; Pasang Purnama (spring tide)",
+      "Gerhana Bulan &ndash; Pasang Purnama (spring tide)",
+      "Gerhana Matahari &ndash; Pasang Perbani (neap tide)",
+      "Gerhana Bulan &ndash; Pasang Perbani (neap tide)"
+    ],
+    ans: 0
+  },
+  {
+    q: "Disebut apakah celah atau ventilasi di permukaan bumi yang mengeluarkan gas dan uap panas, terutama uap air dan gas vulkanik seperti CO2 dan H2S, yang menandakan adanya aktivitas vulkanik dan aliran panas dari reservoir panas bumi ke permukaan?",
+    opts: [
+      "Mata air panas (hot springs)",
+      "Fumarol (uap panas)",
+      "Mud Pool (kolam lumpur panas)",
+      "Geyser"
+    ],
+    ans: 1
+  },
+  {
+    q: "Sebuah papan kayu panjang diletakkan di atas sebuah batu kecil sebagai tumpuan. Di salah satu ujung papan terdapat batu besar sebagai beban. Pada sisi lainnya, Beni menekan tongkat ke bawah untuk mencoba mengangkat batu. Kondisi pertama: batu tumpuan berada di tengah-tengah papan. Kondisi kedua: batu tumpuan lebih dekat ke beban. Apa kesimpulan paling tepat dari eksperimen Beni berdasarkan prinsip kerja tuas?",
+    opts: [
+      "Letak tumpuan tidak memengaruhi gaya yang dibutuhkan untuk mengangkat beban",
+      "Beban menjadi lebih ringan jika didekati oleh tumpuan",
+      "Makin dekat tumpuan ke beban, makin kecil gaya yang dibutuhkan karena lengan kuasa lebih panjang",
+      "Batu lebih mudah terangkat karena papan menjadi lebih elastis saat ditekan dari jauh"
+    ],
+    ans: 2
+  },
+  {
+    q: "Di sebuah laboratorium mini, Sinta menjatuhkan dua bola dengan bentuk yang sama. Bola A bermassa 200g dari logam dan Bola B bermassa 100g dari plastik. Keduanya dijatuhkan bersamaan tanpa gaya awal dari ketinggian 2 meter di tempat yang tidak ada udara (vakum). Manakah pernyataan berikut yang benar tentang pergerakan kedua bola?",
+    opts: [
+      "Bola A jatuh lebih cepat karena massanya lebih besar",
+      "Bola B memiliki kecepatan lebih besar karena lebih ringan",
+      "Kedua bola jatuh bersamaan dengan percepatan yang sama",
+      "Bola B lebih lambat karena hambatan udara lebih kecil"
+    ],
+    ans: 2
+  },
+  {
+    q: "Seorang siswa menggunakan penggaris sebagai tuas untuk mengangkat kubus kecil. Kubus P diletakkan 10 cm dari tumpuan dan kubus Q diletakkan 5 cm di sisi berlawanan. Massa Kubus P adalah 100 gram. Agar penggaris seimbang, berapakah massa kubus Q?",
+    opts: ["25 gram", "50 gram", "100 gram", "200 gram"],
+    ans: 3
+  },
+  {
+    q: "Sebuah bola dilepaskan dari puncak dua perosotan yang licin dengan ketinggian yang sama (Slide A: panjang 5m, Slide B: panjang 6m). Ketika sampai di dasar, manakah pernyataan yang benar tentang kecepatan bola?",
+    opts: [
+      "Bola dari perosotan A lebih cepat karena jalurnya lebih pendek",
+      "Bola dari perosotan B lebih cepat karena jalurnya lebih panjang",
+      "Keduanya memiliki kecepatan yang sama karena ketinggian awalnya sama",
+      "Bola dari perosotan A lebih lambat karena jalurnya lebih curam"
+    ],
+    ans: 2
+  },
+  {
+    q: "Lina menarik kereta mainan dengan benang. Ia menariknya dengan gaya konstan selama 3 detik di lantai licin. Selama itu, kereta bergerak semakin cepat. Apa yang dapat disimpulkan tentang energi dan gaya yang bekerja?",
+    opts: [
+      "Gaya hanya bekerja di awal, lalu berhenti",
+      "Kereta dipercepat karena gaya tarik lebih besar dari gaya gesek",
+      "Energi kinetik tetap karena gaya tarik konstan",
+      "Kereta melambat karena energi potensial berubah"
+    ],
+    ans: 1
+  },
+  {
+    q: "Di sebuah lapangan sekolah, Ani berdiri diam sambil memegang alat penghasil bunyi yang mengeluarkan nada dengan frekuensi tetap 600 Hz. Tiba-tiba, seorang temannya berlari melewati Ani dengan kecepatan 5 m/s sambil mendengarkan suara tersebut. Kecepatan bunyi di udara adalah 340 m/s. Frekuensi bunyi yang didengar teman Ani saat berlari mendekati Ani adalah ....",
+    opts: [
+      "Lebih kecil dari 600 Hz",
+      "Sama dengan 600 Hz",
+      "Lebih besar dari 600 Hz",
+      "Tidak terdengar sama sekali"
+    ],
+    ans: 2
+  },
+  {
+    q: "Perhatikan grafik hubungan antara amplitudo gelombang cahaya dan intensitas yang terukur (kurva naik eksponen). Ketika amplitudo naik dua kali lipat, intensitas naik berapa kali?",
+    opts: ["2 kali", "3 kali", "4 kali", "8 kali"],
+    ans: 2
+  },
+  {
+    q: "Perhatikan tabel data terkait perambatan cahaya dalam beberapa jenis medium: Udara (n=1,00, panjang gelombang=600nm, f=500Hz), Air (n=1,33, panjang gelombang=450nm, f=500Hz), Kaca (n=1,50, panjang gelombang=400nm, f=500Hz). Apa kesimpulan yang benar dari data tabel tersebut?",
+    opts: [
+      "Frekuensi cahaya berubah saat masuk ke medium berbeda",
+      "Panjang gelombang berkurang saat indeks bias medium meningkat",
+      "Kecepatan cahaya tetap sama di semua medium",
+      "Cahaya berubah warna saat memasuki medium berbeda"
+    ],
+    ans: 1
+  },
+  {
+    q: "Dalam sebuah eksperimen, siswa mengukur intensitas cahaya dari sumber titik pada berbagai jarak dan membuat grafik intensitas (lux) terhadap jarak (m). Bagaimana bentuk grafik yang paling sesuai dengan teori fisika (hukum kuadrat terbalik)?",
+    opts: [
+      "Kurva menurun cepat berbentuk hiperbola (intensitas tinggi saat dekat, lalu turun tajam)",
+      "Garis lurus horizontal (intensitas konstan)",
+      "Kurva naik cepat seperti parabola",
+      "Garis lurus menurun"
+    ],
+    ans: 0
+  },
+  {
+    q: "Pada eksperimen gelombang air, Amira mencatat amplitudo gelombang pada berbagai jarak dari sumber getar. Grafik menunjukkan hubungan amplitudo (cm) terhadap jarak (cm) yang semakin menurun seiring bertambahnya jarak. Apa yang paling mungkin menjelaskan pola penurunan amplitudo gelombang ini?",
+    opts: [
+      "Gelombang kehilangan energi karena gesekan dan dispersi saat merambat",
+      "Gelombang bertambah kuat karena penambahan energi dari medium",
+      "Amplitudo berkurang karena frekuensi gelombang menurun",
+      "Amplitudo menurun akibat panjang gelombang memendek"
+    ],
+    ans: 0
+  },
+  {
+    q: "Sepeda listrik menggunakan dua sumber gerak yaitu putaran oleh pedal dan baterai. Manakah dari perubahan energi berikut yang sesuai dengan kondisi pada sepeda listrik jika putaran oleh pedal dan baterai dilakukan bersamaan?",
+    opts: [
+      "Jika hanya mengandalkan putaran oleh pedal, maka terjadi perubahan dari energi listrik menjadi energi kinetik",
+      "Jika hanya mengandalkan baterai, maka terjadi perubahan dari energi listrik menjadi energi potensial",
+      "Jika putaran oleh pedal dan baterai dilakukan bersamaan, maka terjadi perubahan dari energi listrik dan energi kinetik menjadi energi potensial",
+      "Jika putaran oleh pedal dan baterai dilakukan bersamaan, maka terjadi perubahan dari energi listrik dan energi kinetik menjadi energi kinetik"
+    ],
+    ans: 3
+  },
+  {
+    q: "Perhatikan gambar panel surya. Pada panel surya terdapat efisiensi yang dinyatakan dalam persentase (%). Makna dari persentase tersebut adalah ....",
+    opts: [
+      "Rasio sel surya yang digunakan terhadap daya listrik yang dihasilkan",
+      "Rasio energi listrik yang dihasilkan terhadap energi matahari yang diterima",
+      "Rasio energi listrik yang diterima terhadap energi matahari yang dihasilkan",
+      "Rasio energi matahari yang diterima terhadap energi listrik yang dihasilkan"
+    ],
+    ans: 1
+  },
+  {
+    q: "Perhatikan gambar fenomena alam di atas laut berupa pusaran udara yang menjulang dari permukaan laut ke awan. Peristiwa pada gambar tersebut adalah ....",
+    opts: [
+      "Waterspout, terbentuk karena adanya awan stratus",
+      "Waterspout, terbentuk karena adanya awan altostratus",
+      "Waterspout, terbentuk karena adanya awan cumulonimbus",
+      "Waterspout, terbentuk karena adanya awan cirrus"
+    ],
+    ans: 2
+  },
+  {
+    q: "Archimedes melakukan percobaan menentukan suatu besaran fisis dari mahkota yang terbuat dari emas. Besaran fisis yang ditentukan oleh Archimedes adalah ....",
+    opts: ["Rapat massa", "Berat", "Gravitasi", "Suhu"],
+    ans: 0
+  },
+  {
+    q: "Perhatikan gambar rangkaian listrik: satu hambatan seri di kiri, kemudian tiga hambatan paralel, kemudian satu hambatan seri di kanan. Jika besar masing-masing hambatan pada rangkaian tersebut adalah sama (R), maka besar hambatan total adalah ....",
+    opts: ["1,5 R", "2,5 R", "3 R", "4 R"],
+    ans: 1
+  },
+  {
+    q: "Perhatikan grafik perubahan suhu vs waktu (A = suhu naik dari -20 ke 0, B = suhu tetap di 0 (perubahan wujud), C = suhu naik dari 0 ke 100, D = suhu naik di atas 100). Kombinasi perubahan wujud dan kenaikan suhu ditunjukkan pada label ....",
+    opts: [
+      "Perubahan wujud: A; kenaikan suhu: B",
+      "Perubahan wujud: B; kenaikan suhu: C",
+      "Perubahan wujud: C; kenaikan suhu: D",
+      "Perubahan wujud: A; kenaikan suhu: D"
+    ],
+    ans: 1
+  },
+  {
+    q: "Alat ukur yang digunakan untuk mendapatkan besaran fisis perlu dilakukan kalibrasi. Kalibrasi adalah ....",
+    opts: [
+      "Proses membuat alat ukur menunjukkan angka nol sebelum dilakukan pengukuran",
+      "Proses verifikasi alat ukur sesuai standar yang ditetapkan",
+      "Proses menambahkan angka untuk menyesuaikan hasil pengukuran",
+      "Proses menghitung besaran yang diukur"
+    ],
+    ans: 1
+  },
+  {
+    q: "Perhatikan tabel kalor jenis bahan: Perak = 236 J/(kg.K), Tembaga = 386 J/(kg.K), Kaca = 840 J/(kg.K), Air = 4200 J/(kg.K). Asumsikan besar massa masing-masing bahan tersebut adalah sama. Jika pada setiap bahan diberikan panas dengan besar yang sama, maka bahan yang memiliki perubahan suhu terbesar adalah ....",
+    opts: ["Perak", "Tembaga", "Kaca", "Air"],
+    ans: 0
+  },
+  {
+    q: "Perhatikan gambar fluida mengalir dalam suatu pipa (dari penampang besar A1 ke penampang kecil A2 dengan kecepatan v2 lebih besar). Pernyataan yang benar merujuk kepada gambar tersebut adalah ....",
+    opts: [
+      "Debit aliran fluida pada A1 lebih besar dari A2",
+      "Laju aliran fluida pada A1 lebih besar dari A2",
+      "Volume fluida yang mengalir pada A1 lebih besar dari A2 untuk rentang waktu yang sama",
+      "Debit aliran fluida pada A1 dan A2 sama besar"
+    ],
+    ans: 3
+  },
+  {
+    q: "Air pada suhu 37&deg;C jika dikonversi ke skala Kelvin, Fahrenheit, dan Reaumur adalah ....",
+    opts: [
+      "Kelvin = 98,6 K, Fahrenheit = 300&deg;F, Reaumur = 29,6",
+      "Kelvin = 310 K, Fahrenheit = 98,6&deg;F, Reaumur = 29,6",
+      "Kelvin = 310 K, Fahrenheit = 29,6&deg;F, Reaumur = 98,6",
+      "Kelvin = 29,60 K, Fahrenheit = 98,6&deg;F, Reaumur = 29,6"
+    ],
+    ans: 1
+  }
+];
+
+// === STATE ===
+var userName = '', userClass = '', currentQ = 0;
+var answers = new Array(60).fill(-1);
+var timer = null, timeLeft = 5400;
+
+// === START EXAM ===
+function startExam() {
+  var n = document.getElementById('nameInput').value.trim();
+  var c = document.getElementById('classInput').value;
+  var err = document.getElementById('loginError');
+  if (!n || !c) { err.style.display = 'block'; return; }
+  err.style.display = 'none';
+  userName = n; userClass = c;
+  document.getElementById('loginScreen').style.display = 'none';
+  document.getElementById('examScreen').style.display = 'block';
+  document.getElementById('headerName').textContent = n + ' \u00B7 Kelas ' + c;
+  buildNavGrid();
+  renderQ(0);
+  startTimer();
+}
+
+// === TIMER ===
+function startTimer() {
+  timer = setInterval(function() {
+    timeLeft--;
+    if (timeLeft <= 0) { clearInterval(timer); submitExam(); return; }
+    updateTimerDisplay();
+  }, 1000);
+}
+
+function updateTimerDisplay() {
+  var m = Math.floor(timeLeft / 60), s = timeLeft % 60;
+  var d = document.getElementById('timerDisplay');
+  d.textContent = (m < 10 ? '0' : '') + m + ':' + (s < 10 ? '0' : '') + s;
+  d.className = 'timer' + (timeLeft < 300 ? ' urgent' : '');
+}
+
+// === NAV GRID ===
+function buildNavGrid() {
+  var g = document.getElementById('qNavGrid');
+  g.innerHTML = '';
+  for (var i = 0; i < 60; i++) {
+    var b = document.createElement('button');
+    b.className = 'q-num ' + (answers[i] >= 0 ? 'answered' : 'unanswered') + (i === currentQ ? ' current' : '');
+    b.textContent = i + 1;
+    (function(idx) {
+      b.onclick = function() { renderQ(idx); };
+    })(i);
+    g.appendChild(b);
+  }
+}
+
+// === RENDER QUESTION ===
+function renderQ(idx) {
+  currentQ = idx;
+  var q = QUESTIONS[idx];
+  document.getElementById('qNum').textContent = idx + 1;
+  document.getElementById('qText').innerHTML = '<strong>' + (idx + 1) + '. </strong>' + q.q;
+  var opts = document.getElementById('optionsContainer');
+  opts.innerHTML = '';
+  var labels = ['A', 'B', 'C', 'D'];
+  q.opts.forEach(function(o, i) {
+    var div = document.createElement('div');
+    div.className = 'opt' + (answers[idx] === i ? ' selected' : '');
+    div.innerHTML = '<strong>' + labels[i] + '.</strong> ' + o;
+    (function(optIdx) {
+      div.onclick = function() {
+        answers[idx] = optIdx;
+        renderQ(idx);
+        buildNavGrid();
+        updateAnsweredCount();
+      };
+    })(i);
+    opts.appendChild(div);
+  });
+  updateProgress();
+  buildNavGrid();
+}
+
+function updateProgress() {
+  var cnt = answers.filter(function(a) { return a >= 0; }).length;
+  document.getElementById('progressFill').style.width = ((cnt / 60) * 100) + '%';
+}
+
+function updateAnsweredCount() {
+  var cnt = answers.filter(function(a) { return a >= 0; }).length;
+  document.getElementById('answeredCount').textContent = cnt + ' terjawab';
+}
+
+function prevQ() { if (currentQ > 0) renderQ(currentQ - 1); }
+function nextQ() { if (currentQ < 59) renderQ(currentQ + 1); }
+
+// === SUBMIT ===
+function confirmSubmit() {
+  var unanswered = answers.filter(function(a) { return a < 0; }).length;
+  if (unanswered > 0) {
+    if (!confirm(unanswered + ' soal belum dijawab. Apakah Anda yakin ingin menyelesaikan ujian?')) return;
+  }
+  submitExam();
+}
+
+function submitExam() {
+  clearInterval(timer);
+  var correct = 0, wrong = 0, skip = 0;
+  QUESTIONS.forEach(function(q, i) {
+    if (answers[i] < 0) skip++;
+    else if (answers[i] === q.ans) correct++;
+    else wrong++;
+  });
+  var score = Math.round((correct / 60) * 100);
+  document.getElementById('examScreen').style.display = 'none';
+  document.getElementById('resultScreen').style.display = 'block';
+  document.getElementById('resultMeta').textContent = userName + ' \u00B7 Kelas ' + userClass;
+  document.getElementById('scoreNum').textContent = score;
+  document.getElementById('rCorrect').textContent = correct;
+  document.getElementById('rWrong').textContent = wrong;
+  document.getElementById('rSkip').textContent = skip;
+  var sc = document.getElementById('scoreCircle');
+  sc.className = 'score-circle ' + (score >= 85 ? 'score-great' : score >= 70 ? 'score-good' : score >= 55 ? 'score-avg' : 'score-low');
+  var fb = document.getElementById('feedbackMsg');
+  if (score >= 85) {
+    fb.style.cssText = 'padding:16px;border-radius:10px;font-size:15px;text-align:center;margin-bottom:20px;font-weight:600;background:#dcfce7;color:#14532d';
+    fb.textContent = '\uD83C\uDFC6 Luar Biasa! Nilai kamu sangat tinggi! Kamu siap ke tingkat provinsi!';
+  } else if (score >= 70) {
+    fb.style.cssText = 'padding:16px;border-radius:10px;font-size:15px;text-align:center;margin-bottom:20px;font-weight:600;background:#dbeafe;color:#1d4ed8';
+    fb.textContent = '\uD83D\uDC4D Bagus! Terus berlatih untuk hasil yang lebih baik!';
+  } else if (score >= 55) {
+    fb.style.cssText = 'padding:16px;border-radius:10px;font-size:15px;text-align:center;margin-bottom:20px;font-weight:600;background:#fef9c3;color:#78350f';
+    fb.textContent = '\uD83D\uDCAA Cukup baik! Pelajari kembali materi yang masih kurang!';
+  } else {
+    fb.style.cssText = 'padding:16px;border-radius:10px;font-size:15px;text-align:center;margin-bottom:20px;font-weight:600;background:#fee2e2;color:#7f1d1d';
+    fb.textContent = '\uD83D\uDCDA Jangan menyerah! Belajar lebih giat dan coba lagi!';
+  }
+  var rl = document.getElementById('reviewList');
+  rl.innerHTML = '';
+  var labels = ['A', 'B', 'C', 'D'];
+  QUESTIONS.forEach(function(q, i) {
+    var userAns = answers[i], correctAns = q.ans;
+    var isRight = userAns === correctAns;
+    var isSkip = userAns < 0;
+    var div = document.createElement('div');
+    div.className = 'feedback-item ' + (isSkip ? 'fb-skip' : isRight ? 'fb-correct' : 'fb-wrong');
+    var txt = '<strong>No. ' + (i + 1) + '</strong> &mdash; ';
+    if (isSkip) txt += '\u25CB Tidak dijawab &middot; Kunci: <strong>' + labels[correctAns] + '</strong>';
+    else if (isRight) txt += '\u2713 Benar (Jawaban: ' + labels[userAns] + ')';
+    else txt += '\u2717 Salah (Jawaban: ' + labels[userAns] + ') &middot; Kunci: <strong>' + labels[correctAns] + '</strong>';
+    div.innerHTML = txt;
+    rl.appendChild(div);
+  });
+}
+
+// === RESET ===
+function resetExam() {
+  answers = new Array(60).fill(-1);
+  currentQ = 0;
+  timeLeft = 5400;
+  document.getElementById('resultScreen').style.display = 'none';
+  document.getElementById('loginScreen').style.display = 'block';
+  document.getElementById('nameInput').value = '';
+  document.getElementById('classInput').value = '';
+}
+</script>
+</body>
+</html>
